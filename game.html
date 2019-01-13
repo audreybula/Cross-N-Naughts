@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="UTF-8">
+        <title>Cross & Naught</title>
+        <style>
+			body {
+				background-color: #AFDCEC;
+			}
+			
+			#clientNum {
+				border: 1px solid black;
+			}
+			
+            td {
+                width: 60px;
+                height: 60px;
+                border: 1px solid black;
+                text-align: center;
+				background-color: #6AFB92;
+            }  
+			
+			#main {
+				border: none;
+                text-align: center;
+				background-color: #AFDCEC;
+			}
+			
+        </style>
+		<script>
+            // Reset function
+            function reset() {
+                var req = new XMLHttpRequest();
+                req.onreadystatechange = function() {
+                    if(this.readyState == 3 && this.status == 200) {                       
+                        var server = JSON.parse(this.response);
+                        for(i = 1; i <= server["board"].length; ++i) {
+                            document.getElementById("pos" + i.toString()).innerHTML = server["board"][i - 1]
+                        }
+                    }
+                }
+                // 10 is sent to the server to tell the server the reset button has been pressed.
+                // A number is used to prevent a parsing error on the server side
+                req.open("POST", "http://localhost:7000/reset", true);
+                req.send();
+            }
+            // Creates connection to Server and POSTs client position 
+            function clientChoice() {                
+                var clientSelect = document.getElementById("clientNum").value;
+                // Input validation 
+                if(clientSelect < 10 && clientSelect > 0 && clientSelect != "") {
+                    var req = new XMLHttpRequest();
+                    req.onreadystatechange = function() {
+                        if(this.readyState == 4 && this.status == 200) {
+                            // Converts json string into array
+                            var server = JSON.parse(this.response);
+                            // If the client wins
+                            if (server["state"] == "X") {
+                                reset();                               
+								alert("You Win!");
+                            }
+                            // If the Server wins
+                            else if (server["state"] == "O") {
+                                alert("You Lose!");
+                                reset();
+                            }
+                            // If the game is a draw
+                            else if (server["state"] == "D") {
+                                alert("It's a Draw!");                            
+                                reset();                                
+                            }
+                            // If client input is invalid, then server will return "Error"
+                            else if (server != 'Error') {
+                                // Prints the display
+                                for(i = 1; i <= server["board"].length; ++i) {
+                                    document.getElementById("pos" + i.toString()).innerHTML = server["board"][i - 1];
+                                }
+                            }                            
+                        }                    
+                    }
+                    req.open("POST", "http://localhost:7000/" + clientSelect, true);
+                    req.send();
+                }
+                else {
+                    alert("Please select a number between 1 and 9 inclusive");
+                }
+            }
+        </script>
+    </head>
+    <body>
+		<table width="70%">
+			<tr>
+				<td id="main" colspan="2"><h1>Cross & Naught Game</h1></td>
+			</tr>
+			<tr>
+				<td id="main" >
+					<table width="50%">
+					  <p style="text-align:left">Enter the position you wish to place the Cross and click Submit:</p>
+					  <tr>
+						<td id="pos1"></td>
+						<td id="pos2"></td>
+						<td id="pos3"></td>
+					  </tr>
+					  <tr>
+						<td id="pos4"></td>
+						<td id="pos5"></td>
+						<td id="pos6"></td>
+					  </tr>
+					  <tr>
+						<td id="pos7"></td>
+						<td id="pos8"></td>
+						<td id="pos9"></td>
+					  </tr>
+					</table>
+				</td>
+				<td id="main" >				
+					<table width="50%">
+					  <p style="text-align:left">The positions are as follows:</p>	
+					  <tr>
+						<td>1</td>
+						<td>2</td>
+						<td>3</td>
+					  </tr>
+					  <tr>
+						<td>4</td>
+						<td>5</td>
+						<td>6</td>
+					  </tr>
+					  <tr>
+						<td>7</td>
+						<td>8</td>
+						<td>9</td>
+					  </tr>
+					</table>
+				</td>
+			</tr>
+		</table>
+        <div style="margin-top: 10px;">
+            <input id="clientNum" type="text" name="clientNum">
+            <button id="submit" type="button" onclick="clientChoice()">Submit</button>
+            <button id="reset" type="button" onclick="reset()">Reset</button>
+        </div>		
+    </body>
+</html>
