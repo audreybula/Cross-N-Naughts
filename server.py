@@ -139,9 +139,7 @@ while True:
                     crossNaughts.setBoardIndex(clientChoice, "X")
                     # Increment client moves
                     clientMoves += 1
-                    # Don't know how else to decide a Draw. This becomes wrong if the client's
-                    # last move is a winning combination, but it's much better than having an
-                    # infinite loop. Checks if client and server have made maximum number of moves
+                    # Checks if server has made maximum number of moves and client has one remaining move
                     if clientMoves < 5 and serverMoves < 5:
                         while True:
                             # Server chooses a random position
@@ -169,9 +167,17 @@ while True:
                                 break
                     # Enter this else block if there is a draw
                     else:
-                        # Change state to D
-                        crossNaughts.state = "D"
-                        response = json.dumps(crossNaughts.__dict__)
+                        # Check if client has won
+                        winner = WinningComb(crossNaughts.board)
+                        # Client wins
+                        if winner == "X":
+                            # Change state to X
+                            crossNaughts.state = "X"
+                            response = json.dumps(crossNaughts.__dict__)
+                        else:
+                            # Change state to D
+                            crossNaughts.state = "D"
+                            response = json.dumps(crossNaughts.__dict__)
                 # Enter this else block if client chooses an existing position
                 else:
                     # Change state to Error
